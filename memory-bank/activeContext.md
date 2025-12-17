@@ -10,37 +10,27 @@
  - Logging: disabled (no conversation logs stored)
 
 UI/UX (2025-12-17):
-- Applied Tailwind-based chat theme with floating model picker (bottom-right) and modern header/input styling.
- - Model picker now includes `grok-3`.
- - Frontend now renders image outputs (detects image URLs or data URIs from Grok/Gemini replies) directly in chat bubbles.
- - Added left sidebar (≈15% width on lg+) listing conversations stored only in localStorage; supports multi-select checkboxes and deletion, plus “Yeni konuşma” button.
- - Branding updated to `mrtoz.ai`; favicon and bot avatar use `/static/img/mrtozai.PNG`.
- - Dark/light themes with toggle: bot name is blue in light, yellow in dark. Sidebar footer “made by MRTOZ” link lives inside the sidebar and inherits theme colors (blue light / yellow dark) linking to mrtoz.com.
- - Model picker includes `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemma-3-12b`, `grok-3`; no silent fallback when user selects a model.
- - Frontend renders image outputs (detects image URLs or data URIs from Grok/Gemini replies) directly in chat bubbles.
- - Left sidebar (≈15% width on lg+) lists conversations from localStorage; supports multi-select deletion and “Yeni konuşma”.
- - Branding: `mrtoz.ai`; favicon/bot avatar `/static/img/mrtozai.PNG`.
- - Dark/light themes with toggle; bot name blue (light) / yellow (dark); user bubble text forced black even in dark mode. Sidebar footer holds “made by MRTOZ” and `Information` link.
- - Language toggle (TR/EN) with i18n for labels/placeholders/errors; locale-based timestamps; model label translated.
- - Mobile UX: header inline model picker for phones, desktop picker hidden on mobile, selectors stay in sync; extra spacing to prevent overlap with input.
- - Model choice persists in localStorage (desktop/mobile pickers synchronized on load/change).
- - Error handling: quota/rate-limit responses from Gemini/Grok surface a clear one-line message; errors include body text when available.
- - `/information` page with bilingual notice; link uses `/information` path for deployable hosts.
+- Tailwind-based chat theme; floating desktop model picker bottom-right; modern header/input styling.
+- Model picker covers `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemma-3-12b`, `grok-3`; selection persists in localStorage and syncs desktop/mobile.
+- Images in replies render inline (URLs/data URIs from Grok/Gemini).
+- Sidebar rebuilt as Bootstrap offcanvas on mobile and static on desktop; holds conversation list, controls, mobile model picker, and footer links.
+- Branding: `mrtoz.ai`; favicon/bot avatar `/static/img/mrtozai.PNG`; bot name blue (light) / yellow (dark); user bubbles forced black text.
+- TR/EN toggle with i18n for UI/errors; locale-aware timestamps.
+- Mobile UX: hamburger opens offcanvas; mobile model picker moved into sidebar above “made by MRTOZ / Information”; header sticky with proper z-index/background to avoid disappearing when keyboard opens.
+- Error handling: quota/rate-limit messages surfaced clearly with body text when available.
+- `/information` page bilingual; relative link.
 
 ## Recent Changes
- - Model list updated (2.5-flash, 2.5-flash-lite, gemma-3-12b, grok-3); removed silent fallbacks when a model is explicitly chosen.
- - Added TR/EN language toggle with i18n for UI and error/quota messages; locale-aware timestamps.
- - Added quota detection for Gemini and Grok (429/402/403 and body-text heuristics) with frontend messaging.
- - Ensured user bubble text stays black in dark mode.
- - Added `/information` route/page and sidebar footer link; link is relative for deployment.
- - Added `.gitignore` to exclude `.env`, `node_modules/`, `__pycache__/`.
-- Mobile responsive fixes: raised/centered picker on small screens, inline picker beside name on mobile, synced pickers.
+- Sidebar refactored to Bootstrap offcanvas (mobile) + static (desktop); hamburger wired via data attributes, custom JS removed.
+- Mobile model picker relocated into sidebar above footer links; footer pinned to bottom of offcanvas.
+- Mobile header made sticky with z-index/background to prevent disappearance when keyboard opens; spacing tweaked for message area.
+- Model list maintained (2.5-flash, 2.5-flash-lite, gemma-3-12b, grok-3) without silent fallback.
+- TR/EN i18n, quota messaging for Gemini/Grok, and image rendering retained.
+- `.gitignore` covers `.env`, `node_modules/`, `__pycache__/`.
 ## Next Steps
-- Verify Gemini access with the currently available models (2.5-flash, 2.5-pro) and adjust if ListModels changes.
- - Verify Gemini access with current models (2.5-flash, 2.5-flash-lite, gemma-3-12b) and adjust if needed.
- - Validate Grok (`grok-3`) end-to-end with real key; confirm quota/error parsing matches production responses.
- - Document architecture/integration notes in `systemPatterns.md`.
- - Optional: run `npx update-browserslist-db@latest` to silence the CLI warning.
+- Verify Gemini and Grok keys live; confirm 2.5-flash/flash-lite, gemma-3-12b, grok-3 all respond and quota parsing matches real responses.
+- Add note in `systemPatterns.md` about Bootstrap offcanvas integration and mobile header stickiness.
+- Optional: run `npx update-browserslist-db@latest` to silence the CLI warning.
 ## Active Decisions & Considerations
 - Files are authoritative and must be read at session start.
 - Keep entries concise and timestamped when making substantive updates.
