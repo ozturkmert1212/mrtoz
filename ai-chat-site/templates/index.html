@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="/static/css/tailwind.css" />
     <link rel="icon" type="image/png" href="/static/img/mrtozai.PNG" />
     <style>
-      body { min-height: max(884px, 100dvh); }
+      body { min-height: 100dvh; }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       @keyframes fadeInUp { from { opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
@@ -64,6 +64,17 @@
       .dark .text-base { color: inherit; }
       .dark select { background-color: #11141c; color: #eaeaf0; border-color: #1f2430; }
       .dark #lang-menu { background-color: #11141c; border-color: #1f2430; }
+
+      /* Mobile tweaks */
+      @media (max-width: 768px) {
+        header { padding: 12px 14px !important; }
+        #messages { padding: 12px !important; }
+        #chat-form { border-radius: 18px; }
+        /* Move model picker above the input to avoid overlap */
+        .model-picker { left: 50%; right: auto; transform: translateX(-50%); bottom: 96px; }
+        .model-picker select { max-width: 140px; }
+        main { padding-bottom: 140px; }
+      }
 
     </style>
     <script
