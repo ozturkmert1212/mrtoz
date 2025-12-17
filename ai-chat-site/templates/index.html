@@ -1,0 +1,475 @@
+<!doctype html>
+<html class="light" lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mrtoz.ai</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- Bootstrap 5 (for optional components; Tailwind remains primary) -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="/static/css/tailwind.css" />
+    <link rel="icon" type="image/png" href="/static/img/mrtozai.PNG" />
+    <style>
+      body { min-height: max(884px, 100dvh); }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      @keyframes fadeInUp { from { opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
+      .animate-fade-in-up { animation: fadeInUp 0.35s ease-out forwards; opacity:0; }
+
+      /* Brand colors for bot name */
+      .light .bot-title, .light .bot-name-label { color: #2563eb; }
+      .dark .bot-title, .dark .bot-name-label { color: #f9f506; }
+      .light .footer-madeby { color: #2563eb; }
+      .dark .footer-madeby { color: #f9f506 !important; }
+      .dark .footer-madeby *, .dark .footer-madeby a { color: #f9f506 !important; }
+      .footer-madeby a { color: inherit; text-decoration: none; }
+      .footer-madeby a:hover { text-decoration: underline; }
+
+      /* Dark mode overrides */
+      .dark body { background-color: #0d0f12; color: #eaeaf0; }
+      .dark main, .dark aside, .dark header, .dark p, .dark span, .dark div { color: #eaeaf0; }
+      .dark .bg-background-light { background-color: #0d0f12 !important; }
+      .dark .bg-white { background-color: #11141c !important; }
+      .dark .border-stone-100,
+      .dark .border-stone-200 { border-color: #1f2430 !important; }
+      .dark .text-stone-500 { color: #a0a7b8 !important; }
+      .dark .text-stone-400 { color: #c0c6d4 !important; }
+      .dark .text-[#1c1c0d] { color: #eaeaf0 !important; }
+      .dark .model-picker { background-color: #11141c; }
+      .dark .hover\:bg-stone-100:hover { background-color: #1a1f2b !important; }
+      .dark .bg-background-light\/90 { background-color: rgba(13,15,18,0.9) !important; }
+      .dark .bg-gradient-to-t { background-image: linear-gradient(to top, rgba(0,0,0,0.35), transparent) !important; }
+      .dark input::placeholder { color: #7e8798; }
+      .dark .bubble-bot { background-color: #161921 !important; color: #eaeaf0 !important; }
+      .dark .bubble-user { background-color: #f9f506 !important; color: #0c0c0c !important; }
+      .dark .text-main { color: #eaeaf0 !important; }
+      .dark .text-stone-600 { color: #8c94a3 !important; }
+      .dark .border { border-color: #1f2430 !important; }
+      .dark .bg-stone-100 { background-color: #11141c !important; }
+      .dark .bg-stone-200 { background-color: #161b26 !important; }
+      .dark .bg-stone-400 { background-color: #2b3241 !important; }
+      .dark .bg-primary { color: #0a0a0a; }
+      .dark #send { background-color: #f9f506 !important; color: #000 !important; }
+      .dark #send span { color: #000 !important; }
+      .dark .shadow-lg, .dark .shadow-md, .dark .shadow-sm { box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+      .dark .text-base { color: inherit; }
+      .dark select { background-color: #11141c; color: #eaeaf0; border-color: #1f2430; }
+    </style>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+      defer
+    ></script>
+  </head>
+  <body class="h-screen w-full overflow-hidden bg-background-light text-[#1c1c0d] font-display">
+    <div class="flex h-full w-full">
+      <aside class="hidden lg:flex flex-col justify-between bg-white border-r border-stone-200 w-[15%] min-w-[220px] max-w-xs h-full">
+        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-stone-100">
+          <div>
+            <p class="text-sm font-semibold text-[#1c1c0d]">Konuşmalar</p>
+            <p class="text-xs text-stone-500">Cihazında saklanır</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="delete-convo" class="size-10 flex items-center justify-center rounded-full border border-stone-200 text-stone-500 hover:bg-stone-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Seçili konuşmaları sil" disabled>
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+            </button>
+            <button id="new-convo" class="size-10 flex items-center justify-center rounded-full border border-stone-200 hover:bg-stone-100 transition-colors" title="Yeni konuşma">
+              <span class="material-symbols-outlined text-[20px]">add</span>
+            </button>
+          </div>
+        </div>
+        <div id="convo-list" class="flex-1 overflow-y-auto no-scrollbar divide-y divide-stone-100"></div>
+        <div class="px-4 py-3 text-sm footer-madeby border-t border-stone-100">
+          <span>made by <a href="https://mrtoz.com" target="_blank" rel="noreferrer" class="font-semibold">MRTOZ</a></span>
+        </div>
+      </aside>
+
+      <main class="flex-1 h-full flex flex-col relative bg-background-light">
+        <header class="flex items-center justify-between px-6 py-4 bg-background-light/90 backdrop-blur-sm z-10 sticky top-0">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shadow-sm" style="background-image: url('/static/img/mrtozai.PNG');"></div>
+              <div class="absolute bottom-0 right-0 size-2.5 bg-green-500 rounded-full border-2 border-background-light"></div>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold leading-tight bot-title">mrtoz.ai</h2>
+              <p class="text-xs text-stone-500 font-medium">Online</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="theme-toggle" class="flex items-center justify-center rounded-full size-10 hover:bg-stone-100 text-[#1c1c0d] transition-colors" title="Tema">
+              <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
+            </button>
+            <button class="flex items-center justify-center rounded-full size-10 hover:bg-stone-100 text-[#1c1c0d] transition-colors">
+              <span class="material-symbols-outlined">more_vert</span>
+            </button>
+          </div>
+        </header>
+
+        <div id="messages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 pb-28 no-scrollbar"></div>
+
+        <div class="absolute bottom-6 left-0 right-0 px-3 sm:px-6">
+          <div class="w-full max-w-full md:max-w-3xl mx-auto relative">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent -top-12 pointer-events-none rounded-xl"></div>
+            <form id="chat-form" class="relative flex items-center bg-white rounded-full shadow-lg border border-stone-100 transition-all focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary w-full" onsubmit="event.preventDefault();">
+              <button type="button" class="ml-2 size-10 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-600 transition-colors">
+                <span class="material-symbols-outlined text-[24px]">add_circle</span>
+              </button>
+              <input id="prompt" class="flex-1 bg-transparent border-none text-[#1c1c0d] placeholder-stone-400 focus:ring-0 py-4 px-2 text-base" placeholder="Bir mesaj yazın..." type="text" />
+              <button id="send" type="submit" class="mr-2 size-10 flex items-center justify-center rounded-full bg-primary text-black shadow-md hover:bg-[#ebe705] hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
+                <span class="material-symbols-outlined text-[20px] font-bold ml-0.5">arrow_upward</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="model-picker fixed right-4 bottom-4 bg-white border border-stone-200 shadow-lg rounded-lg px-3 py-2 text-sm flex items-center gap-2">
+          <span class="text-stone-600">Model</span>
+          <select id="model" class="border border-stone-200 rounded-md px-2 py-1 text-sm focus:ring-primary focus:border-primary">
+            <option value="gemini-2.5-flash" selected>gemini-2.5-flash</option>
+            <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+            <option value="grok-3">grok-3</option>
+          </select>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const messagesEl = document.getElementById('messages');
+      const promptEl = document.getElementById('prompt');
+      const sendBtn = document.getElementById('send');
+      const modelEl = document.getElementById('model');
+      const formEl = document.getElementById('chat-form');
+      const convoListEl = document.getElementById('convo-list');
+      const newConvoBtn = document.getElementById('new-convo');
+      const deleteConvoBtn = document.getElementById('delete-convo');
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const themeIcon = document.getElementById('theme-icon');
+
+      const STORAGE_KEY = 'cline_conversations_v1';
+      const THEME_KEY = 'mrtoz_theme';
+      let conversations = [];
+      let activeConvoId = null;
+      let selectedConvoIds = new Set();
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          conversations = parsed.conversations || [];
+          activeConvoId = parsed.activeConvoId || conversations[0]?.id || null;
+        } catch (e) {
+          console.warn('State load failed', e);
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ conversations, activeConvoId }));
+        } catch (e) {
+          console.warn('State save failed', e);
+        }
+      }
+
+      function applyTheme(mode) {
+        const root = document.documentElement;
+        root.classList.remove('light', 'dark');
+        root.classList.add(mode);
+        if (themeIcon) themeIcon.textContent = mode === 'dark' ? 'light_mode' : 'dark_mode';
+        try { localStorage.setItem(THEME_KEY, mode); } catch (_) {}
+      }
+
+      function initTheme() {
+        const stored = (() => { try { return localStorage.getItem(THEME_KEY); } catch (_) { return null; } })();
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(stored || (prefersDark ? 'dark' : 'light'));
+      }
+
+      function updateDeleteButton() {
+        if (!deleteConvoBtn) return;
+        const disabled = !selectedConvoIds.size;
+        deleteConvoBtn.disabled = disabled;
+      }
+
+      function makeId() {
+        if (crypto && crypto.randomUUID) return crypto.randomUUID();
+        return 'conv-' + Date.now() + '-' + Math.floor(Math.random() * 1e6);
+      }
+
+      function createConversation(title = 'Yeni konuşma') {
+        return { id: makeId(), title, messages: [], updatedAt: Date.now() };
+      }
+
+      function touchConversation(conv) {
+        conv.updatedAt = Date.now();
+        conversations = [conv, ...conversations.filter((c) => c.id !== conv.id)];
+      }
+
+      function getActiveConversation() {
+        return conversations.find((c) => c.id === activeConvoId) || null;
+      }
+
+      function setActiveConversation(id) {
+        activeConvoId = id;
+        selectedConvoIds.delete(id);
+        saveState();
+        renderConvoList();
+        renderMessages();
+      }
+
+      function addMessageToActive(role, text) {
+        let conv = getActiveConversation();
+        if (!conv) {
+          conv = createConversation();
+          conversations.unshift(conv);
+          activeConvoId = conv.id;
+        }
+        conv.messages.push({ role, text });
+        if (role === 'user' && conv.title === 'Yeni konuşma') {
+          conv.title = text.slice(0, 40) || 'Yeni konuşma';
+        }
+        touchConversation(conv);
+        saveState();
+        renderConvoList();
+      }
+
+      function renderConvoList() {
+        if (!convoListEl) return;
+        convoListEl.innerHTML = '';
+        conversations.forEach((conv) => {
+          const row = document.createElement('div');
+          row.className = `flex items-start gap-2 px-3 py-3 transition-colors hover:bg-stone-100 ${conv.id === activeConvoId ? 'bg-stone-100 border-l-2 border-primary' : ''}`;
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'mt-1 accent-[#f9f506]';
+          checkbox.checked = selectedConvoIds.has(conv.id);
+          checkbox.addEventListener('click', (e) => {
+            e.stopPropagation();
+          });
+          checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) selectedConvoIds.add(conv.id);
+            else selectedConvoIds.delete(conv.id);
+            updateDeleteButton();
+          });
+
+          const btn = document.createElement('button');
+          btn.className = 'flex-1 text-left';
+          const title = document.createElement('div');
+          title.className = 'text-sm font-medium text-[#1c1c0d] truncate';
+          title.textContent = conv.title || 'Konuşma';
+          const meta = document.createElement('div');
+          meta.className = 'text-xs text-stone-500';
+          const date = new Date(conv.updatedAt || Date.now());
+          meta.textContent = date.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' }) + ' • ' + date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+          btn.appendChild(title);
+          btn.appendChild(meta);
+          btn.addEventListener('click', () => setActiveConversation(conv.id));
+
+          row.appendChild(checkbox);
+          row.appendChild(btn);
+          convoListEl.appendChild(row);
+        });
+        updateDeleteButton();
+      }
+
+      function renderMessages() {
+        messagesEl.innerHTML = '';
+        const conv = getActiveConversation();
+        if (!conv) return;
+        conv.messages.forEach((m) => bubble(m.text, m.role));
+      }
+
+      function newConversation() {
+        const conv = createConversation();
+        conversations.unshift(conv);
+        activeConvoId = conv.id;
+        selectedConvoIds.clear();
+        saveState();
+        renderConvoList();
+        messagesEl.innerHTML = '';
+      }
+
+      function deleteSelectedConversations() {
+        if (!selectedConvoIds.size) return;
+        conversations = conversations.filter((c) => !selectedConvoIds.has(c.id));
+        const activeRemoved = !conversations.find((c) => c.id === activeConvoId);
+        if (activeRemoved) {
+          activeConvoId = conversations[0]?.id || null;
+        }
+        selectedConvoIds.clear();
+
+        if (!activeConvoId) {
+          const conv = createConversation();
+          conversations = [conv];
+          activeConvoId = conv.id;
+        }
+        saveState();
+        renderConvoList();
+        renderMessages();
+      }
+
+      function createContentNode(text) {
+        const wrap = document.createElement('div');
+        const imgPattern = /(https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg))(?!\S)/i;
+        const dataPattern = /^data:image\/(png|jpe?g|gif|webp|svg\+xml);base64,/i;
+
+        const dataMatch = dataPattern.test(text);
+        const urlMatch = text.match(imgPattern);
+
+        if (dataMatch || urlMatch) {
+          const img = document.createElement('img');
+          img.src = dataMatch ? text.trim() : urlMatch[1];
+          img.alt = 'image result';
+          img.loading = 'lazy';
+          img.style.maxWidth = '100%';
+          img.style.borderRadius = '12px';
+          img.style.display = 'block';
+          img.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)';
+
+          // If there is surrounding text, keep it too
+          const pre = text.replace(urlMatch ? urlMatch[1] : '', '').trim();
+          if (pre) {
+            const p = document.createElement('div');
+            p.textContent = pre;
+            p.style.marginBottom = '8px';
+            wrap.appendChild(p);
+          }
+          wrap.appendChild(img);
+          return wrap;
+        }
+
+        const p = document.createElement('div');
+        p.textContent = text;
+        wrap.appendChild(p);
+        return wrap;
+      }
+
+      function bubble(text, role = 'bot', loading = false) {
+        const wrap = document.createElement('div');
+        wrap.className = `flex items-end gap-3 max-w-[95%] sm:max-w-[85%] ${role === 'user' ? 'self-end flex-row-reverse' : 'self-start'} animate-fade-in-up`;
+
+        const avatar = document.createElement('div');
+        avatar.className = 'bg-center bg-no-repeat bg-cover rounded-full size-8 shrink-0 mb-1';
+        avatar.style.backgroundImage = role === 'user'
+          ? 'linear-gradient(135deg,#f9f506,#f5d800)'
+          : "url('/static/img/mrtozai.PNG')";
+
+        const col = document.createElement('div');
+        col.className = `flex flex-col gap-1 ${role === 'user' ? 'items-end' : 'items-start'}`;
+
+        const name = document.createElement('span');
+        name.className = 'text-xs text-stone-500 ml-2';
+        if (role !== 'user') name.classList.add('bot-name-label');
+        name.textContent = role === 'user' ? 'You' : 'mrtoz.ai';
+
+        const bubbleEl = document.createElement('div');
+        bubbleEl.className = `text-base leading-relaxed shadow-sm px-5 py-3 rounded-2xl ${role === 'user' ? 'bg-primary text-[#1c1c0d] rounded-br-sm font-medium' : 'bg-white text-[#1c1c0d] rounded-bl-sm'} `;
+        bubbleEl.classList.add(role === 'user' ? 'bubble-user' : 'bubble-bot');
+
+        if (loading) {
+          bubbleEl.className += ' flex gap-1 items-center h-[48px]';
+          ['','150ms','300ms'].forEach((delay, idx) => {
+            const dot = document.createElement('span');
+            dot.className = 'size-2 bg-stone-400 rounded-full animate-bounce';
+            if (delay) dot.style.animationDelay = delay;
+            bubbleEl.appendChild(dot);
+          });
+        } else {
+          const node = createContentNode(text);
+          bubbleEl.appendChild(node);
+        }
+
+        col.appendChild(name);
+        col.appendChild(bubbleEl);
+        wrap.appendChild(avatar);
+        wrap.appendChild(col);
+        messagesEl.appendChild(wrap);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return wrap;
+      }
+
+      async function sendMessage() {
+        const prompt = promptEl.value.trim();
+        if (!prompt) return;
+        promptEl.value = '';
+
+        addMessageToActive('user', prompt);
+        bubble(prompt, 'user');
+        const loadingBubble = bubble('...', 'bot', true);
+
+        try {
+          const model = modelEl?.value;
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(model ? { prompt, model } : { prompt })
+          });
+          const j = await res.json();
+          loadingBubble.remove();
+          if (j.reply) {
+            addMessageToActive('bot', j.reply);
+            bubble(j.reply, 'bot');
+          } else {
+            const errText = 'Error: ' + (j.error || 'unknown');
+            addMessageToActive('bot', errText);
+            bubble(errText, 'bot');
+          }
+        } catch (e) {
+          loadingBubble.remove();
+          const errText = 'Network error: ' + e.message;
+          addMessageToActive('bot', errText);
+          bubble(errText, 'bot');
+        }
+      }
+
+      formEl.addEventListener('submit', (e) => {
+        e.preventDefault();
+        sendMessage();
+      });
+
+      promptEl.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      newConvoBtn?.addEventListener('click', () => {
+        newConversation();
+        promptEl.focus();
+      });
+
+      deleteConvoBtn?.addEventListener('click', () => {
+        deleteSelectedConversations();
+      });
+
+      themeToggleBtn?.addEventListener('click', () => {
+        const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+        applyTheme(next);
+      });
+
+      // hydrate from storage on load
+      loadState();
+      if (!activeConvoId) {
+        const conv = createConversation();
+        conversations = [conv];
+        activeConvoId = conv.id;
+        saveState();
+      }
+      renderConvoList();
+      renderMessages();
+      initTheme();
+    </script>
+  </body>
+</html>

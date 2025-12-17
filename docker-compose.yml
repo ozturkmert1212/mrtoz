@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  mrtoz-ai:
+    build: .
+    container_name: mrtoz-ai
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROK_API_KEY=${GROK_API_KEY}
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
