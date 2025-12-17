@@ -10,7 +10,8 @@ GROK_API_KEY = os.getenv('GROK_API_KEY')
 # Supported models and default order. Default primary is 2.5-flash with 1.5-pro-latest as final fallback.
 SUPPORTED_MODELS = {
     'gemini-2.5-flash': 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
-    'gemini-2.5-pro': 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent',
+    'gemini-2.5-flash-lite': 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent',
+    'gemma-3-12b': 'https://generativelanguage.googleapis.com/v1beta/models/gemma-3-12b-it:generateContent',
     'grok-3': 'https://api.x.ai/v1/chat/completions'
 }
 
@@ -96,7 +97,8 @@ def chat():
     else:
         endpoints = [
             SUPPORTED_MODELS['gemini-2.5-flash'],
-            SUPPORTED_MODELS['gemini-2.5-pro']
+            SUPPORTED_MODELS['gemini-2.5-flash-lite'],
+            SUPPORTED_MODELS['gemma-3-12b']
         ]
 
     last_resp = None
