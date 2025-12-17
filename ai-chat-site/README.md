@@ -1,107 +1,70 @@
-# Cline AI Chat (Flask + Gemini)
+# mrtoz.ai Chat (Flask + Gemini/Grok)
 
-Basit bir AI sohbet uygulaması. Konfigürasyon ve çalıştırma:
+Çok modellli, TR/EN dil seçenekli, koyu/açık temalı sohbet arayüzü. Sohbetler sadece tarayıcı `localStorage`’ında saklanır; sunucu log tutmaz.
 
-1. Sanal ortam oluşturun ve bağımlılıkları yükleyin:
+## Özellikler
+- Modeller: `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemma-3-12b`, `grok-3`. Kullanıcı model seçerse fallback yapılmaz; seçmezse sıralama: flash → flash-lite → gemma.
+- TR/EN dil toggle (UI, placeholder, hata/kota mesajları ve tarih formatı).
+- Koyu/açık tema, kullanıcı balonu her zaman siyah metin.
+- Görsel yanıtları otomatik gösterme (URL veya data URI img). 
+- Yerel konuşma geçmişi (sidebar, multi-select silme, yeni konuşma).
+- Quota/rate-limit durumları tek cümlelik uyarıyla iletilir (Gemini & Grok).
+- Sidebar altı: “made by MRTOZ” ve `/information` linki (bilingüal bilgi sayfası).
 
-```bash
+## Kurulum (Python)
+1) Sanal ortam + bağımlılıklar
+```powershell
 python -m venv .venv
-.venv\Scripts\activate  # Windows
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
-
-2. `GEMINI_API_KEY` ortam değişkenini ayarlayın (veya `.env` kullanın):
-
-```bash
-set GEMINI_API_KEY=your_key_here  # Windows cmd
-$env:GEMINI_API_KEY="your_key_here"  # PowerShell
+2) Ortam değişkenleri (veya `.env` kullan)
+```powershell
+$env:GEMINI_API_KEY="your_key"
+$env:GROK_API_KEY="your_grok_key"   # isteğe bağlı
 ```
-
-3. Uygulamayı çalıştırın:
-
-```bash
+3) Çalıştır
+```powershell
 python app.py
 ```
+4) Aç: http://127.0.0.1:5000
 
-4. Tarayıcıda `http://127.0.0.1:5000` adresini açın.
-
-Notlar:
-- Bu örnek konuşma geçmişini veya log tutmaz (kullanıcının isteği üzerine).
-- Gemini API çağrıları için Google tarafında doğru izinlerin ve anahtarın yapılandırıldığından emin olun.
-- Tailwind CDN kaldırıldı; statik stil dosyası `static/css/tailwind.css` olarak projeye eklendi. Görsel uyumsuzluk yaşarsanız bu dosyayı yeniden derleyin.
-
-Alternatif: WSGI ile (Waitress) üretim/servis benzeri çalıştırma (Windows için önerilir):
-
-1. Kurulum:
-
+Waitress (Windows servis benzeri)
 ```powershell
-pip install -r ai-chat-site\requirements.txt
+python run_waitress.py
 ```
 
-2. Çalıştırma:
-
+## Docker Compose
+Kök dizinde `.env` oluştur (gitignore’da kalır):
+```
+GEMINI_API_KEY=your_key
+GROK_API_KEY=your_grok_key
+```
+Sonra:
 ```powershell
-python ai-chat-site\run_waitress.py
+docker compose up --build
 ```
 
-Sunucu `0.0.0.0:5000` üzerinde çalışacaktır; tarayıcıdan `http://127.0.0.1:5000` adresini açın.
-
-Not: Üretimde ek güvenlik, ters proxy (nginx/Cloud Load Balancer), TLS ve süreç yönetimi (örn. Windows servis veya systemd/PM2/tini) yapılandırın.
-
-Gemini uç noktası (güncel)
-
-- Kullanılan modeller (varsayılan sıra): `gemini-2.5-flash` (primary), `gemini-2.5-pro` (fallback). İsteğe bağlı ek: `grok-3` (xAI) seçilebilir.
-
-İstemci tarafında model seçimi
-
-- `/api/chat` isteğine `model` alanı ekleyebilirsiniz. Örnek JSON:
-
+## API ve modeller
+- Endpoint: `/api/chat`
+- İstek gövdesi:
 ```json
 {
-	"prompt": "Hello, how are you?",
-	"model": "gemini-2.5-pro"
+  "prompt": "Hello",
+  "model": "gemini-2.5-flash"
 }
 ```
+- Desteklenen modeller: `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemma-3-12b`, `grok-3`.
+- Model belirtmezsen: flash → flash-lite → gemma sırayla denenir; Grok seçiliyse Grok’a gider.
+- Grok için `GROK_API_KEY` gerekir, endpoint: `https://api.x.ai/v1/chat/completions`.
 
-- Desteklenen modeller: `gemini-2.5-flash`, `gemini-2.5-pro`, `grok-3`.
-- Eğer `model` göndermezseniz, yukarıdaki varsayılan sırayla denenir.
-- Endpoint örneği: `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=YOUR_KEY`
-- Örnek curl (Windows PowerShell `curl.exe` ile):
-
-```powershell
-curl.exe -X POST -H "Content-Type: application/json" ^
-	-d "{\"contents\":[{\"parts\":[{\"text\":\"Hello, how are you?\"}]}],\"generationConfig\":{\"temperature\":0.2,\"maxOutputTokens\":256}}" ^
-	"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=YOUR_KEY"
-```
-
-Grok (xAI) kullanımı
-
-- Ortam değişkeni: `GROK_API_KEY`
-- Endpoint: `https://api.x.ai/v1/chat/completions`
-- Model: `grok-3`
-- Örnek curl (PowerShell `curl.exe`):
-
-```powershell
-curl.exe -X POST -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_GROK_KEY" ^
-  -d "{\"model\":\"grok-3\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}],\"temperature\":0.2}" ^
-  "https://api.x.ai/v1/chat/completions"
-```
-
-Tailwind yeniden derleme (opsiyonel, Node gerekir)
-
-1) Node yüklü ise (şu anda ortamda `npm` bulunmuyor):
-
+## Tailwind derleme (opsiyonel)
 ```bash
-cd ai-chat-site
-npm install -D tailwindcss postcss autoprefixer
+npm install
+npm run build:css   # src/input.css -> static/css/tailwind.css
 ```
 
-2) Giriş dosyası: `src/input.css` already has `@tailwind base; @tailwind components; @tailwind utilities;`
-
-3) Derleme:
-
-```bash
-npx tailwindcss -i ./src/input.css -o ./static/css/tailwind.css --minify
-```
-
-Not: `tailwind.config.js` `./templates/**/*.html` yollarını tarar. Üretim dağıtımlarında bu adımı CI/CD’ye ekleyin.
+## Notlar
+- Log tutulmaz, sohbetler sadece tarayıcı `localStorage`’ında.
+- `.env` dosyasını repoya ekleme; anahtarlarını gizli tut.
+- Quota/rate-limit (402/403/429 veya body’de “quota/rate limit”) durumunda frontend tek satır uyarı gösterir.

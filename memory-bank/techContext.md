@@ -13,13 +13,12 @@
 Quick start (Windows)
 
 1. Create and activate a virtual environment:
+## Technologies
+- Python 3.10+ (tested with 3.11)
+- Flask (simple HTTP backend)
+- `requests` for outbound HTTP to Gemini/Grok
+- No DB for chat logs (logging disabled; SQLite unused)
 
-```powershell
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-2. Install dependencies:
 
 ```powershell
 pip install -r ai-chat-site\requirements.txt
@@ -59,35 +58,30 @@ python ai-chat-site\run_waitress.py
 - For Windows-based WSGI deployment, `waitress` is a simple, reliable choice (see `ai-chat-site/run_waitress.py`).
 - For Unix/Linux, prefer `gunicorn` with `uvicorn` (ASGI) for async and streaming improvements.
 - UI styling uses a locally checked-in `static/css/tailwind.css` (CDN removed). If visuals drift, rebuild with Tailwind CLI when Node/npm is available.
-- Tailwind build: `npm run build:css` (uses v3 CLI, input `src/input.css`, output `static/css/tailwind.css`).
 - Branding/assets: page title and bot name `mrtoz.ai`; favicon and bot avatar use `static/img/mrtozai.PNG`.
-- Conversation data persists client-side in `localStorage`; server still avoids logging per requirements.
-- Theme toggle with persistence: blue bot name in light, yellow in dark; sidebar footer link (“made by MRTOZ”) inherits theme colors (blue/yellow) and links to mrtoz.com; send button keeps black arrow in dark mode.
-
 ## Dependencies
-- External services, APIs, and key libraries.
-
-- Google Gemini (Generative Language API) — requires an API key with the appropriate permissions.
-- Grok (xAI) — `GROK_API_KEY`, endpoint `https://api.x.ai/v1/chat/completions`, model `grok-3`.
+## Technical Constraints
+- Minimal synchronous Flask backend, suitable for light usage/testing.
+- For production: prefer ASGI (gunicorn+uvicorn), add retries/rate limiting.
+- Windows-friendly WSGI: `waitress` (`run_waitress.py`).
+- Tailwind build: `npm run build:css` (v3 CLI; input `src/input.css`, output `static/css/tailwind.css`).
+- Branding: title/bot name `mrtoz.ai`; favicon/avatar `static/img/mrtozai.PNG`.
+- Client-side only storage: conversations in `localStorage`; server does not log.
+- Themes: light/dark toggle with persistence; user bubble text forced black even in dark mode; footer has `made by MRTOZ` and `Information` link.
+- Language toggle TR/EN with i18n for labels, placeholders, error/quota messages; timestamps localized.
+- Testing, linting, CI/CD conventions and commands.
+- Development workflow: local virtualenv → set `GEMINI_API_KEY` (and optionally `GROK_API_KEY`) → run `python ai-chat-site\app.py`.
+## Dependencies
+- Google Gemini (Generative Language API) — models: `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemma-3-12b`.
+- Grok (xAI) — endpoint `https://api.x.ai/v1/chat/completions`, model `grok-3`.
 - `requests` for HTTP calls from backend.
 
-## Tool Usage Patterns
-- Testing, linting, CI/CD conventions and commands.
-
-- Development workflow: local virtualenv → set `GEMINI_API_KEY` (and optionally `GROK_API_KEY`) → run `python ai-chat-site\app.py`.
-- Do not commit keys or `.env` files; add `.env` to `.gitignore` if used.
-
-## Example Quick Start
-
-Gemini API notes and request examples (current models):
 - Primary: `gemini-2.5-flash`
-- Fallback: `gemini-2.5-pro`
-- Endpoint pattern: `https://generativelanguage.googleapis.com/v1/models/<model>:generateContent?key=API_KEY`
+## Tool Usage Patterns
+- Dev workflow: local venv → set `GEMINI_API_KEY` (and optional `GROK_API_KEY`) → run `python ai-chat-site\app.py` or `run_waitress.py`.
+- Do not commit keys or `.env` files; `.env` is gitignored.
 
 Python (`requests`) example matching `ai-chat-site/app.py` structure:
-
-```python
-import os, requests
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 url = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent'
@@ -127,8 +121,10 @@ Response handling notes
 
 Security & operational notes
 - Never store API keys in source control. Use environment variables or secret managers.
-- Rotate keys if accidentally exposed.
-- Be mindful of quotas and billing for API usage.
+Response handling notes
+- `generateContent` typically returns `candidates[0].content.parts[0].text`. Fallback to other fields if needed.
+- Check HTTP status; 404 often means model not available to the project. Use ListModels to confirm availability.
+- Quota/rate-limit: backend surfaces `quota_exceeded` flag for 402/403/429 and body-text hints; frontend shows one-line message.
 - Add retries/backoff and input validation for production.
 
 Troubleshooting
