@@ -65,6 +65,10 @@
       .dark select { background-color: #11141c; color: #eaeaf0; border-color: #1f2430; }
       .dark #lang-menu { background-color: #11141c; border-color: #1f2430; }
 
+      /* Prevent list bullets in AI responses */
+      .bubble-bot ul, .bubble-bot ol, .bubble-bot li { list-style: none; margin: 0; padding-left: 0; }
+      .bubble-bot li::marker { content: ''; }
+
       .mobile-model-picker { display: none; }
 
       /* Mobile tweaks */
@@ -105,7 +109,7 @@
         </div>
         <div id="convo-list" class="flex-1 overflow-y-auto no-scrollbar divide-y divide-stone-100"></div>
         <div class="px-4 py-3 text-sm footer-madeby border-t border-stone-100 flex items-center justify-between gap-3">
-          <span>made by <a href="https://mrtoz.com" target="_blank" rel="noreferrer" class="font-semibold">MRTOZ</a></span>
+          <span>made by <a href="https://mrtoz.com" target="_blank" rel="noreferrer" class="font-semibold" style="text-decoration: underline;">MRTOZ</a></span>
           <a href="/information" target="_blank" rel="noreferrer" class="text-xs text-stone-500 hover:text-stone-700 underline">Information</a>
         </div>
       </aside>
@@ -194,6 +198,7 @@
       const STORAGE_KEY = 'cline_conversations_v1';
       const THEME_KEY = 'mrtoz_theme';
       const LANG_KEY = 'mrtoz_lang';
+      const MODEL_KEY = 'mrtoz_model';
       const I18N = {
         tr: {
           conversations: 'Konuşmalar',
@@ -280,6 +285,21 @@
         }
       }
 
+      function loadModel() {
+        try {
+          const stored = localStorage.getItem(MODEL_KEY);
+          if (stored) {
+            syncModel(stored, 'init');
+          }
+        } catch (e) {
+          console.warn('Model load failed', e);
+        }
+      }
+
+      function saveModel(value) {
+        try { localStorage.setItem(MODEL_KEY, value); } catch (_) {}
+      }
+
       function saveState() {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ conversations, activeConvoId }));
@@ -324,6 +344,24 @@
 
       function getActiveConversation() {
         return conversations.find((c) => c.id === activeConvoId) || null;
+      }
+
+      function formatMarkdown(text) {
+        if (!text) return '';
+        // Escape HTML
+        let escaped = text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+        // Bold **text** or __text__
+        escaped = escaped.replace(/(\*\*|__)(.+?)\1/g, '<strong>$2</strong>');
+        // Italic *text* or _text_
+        escaped = escaped.replace(/(\*|_)([^\s][^*<_]*?)\1/g, '<em>$2</em>');
+        // Line breaks
+        escaped = escaped.replace(/\n/g, '<br>');
+        return escaped;
       }
 
       function setActiveConversation(id) {
@@ -458,7 +496,9 @@
         }
 
         const p = document.createElement('div');
-        p.textContent = text;
+        p.innerHTML = formatMarkdown(text);
+        p.style.whiteSpace = 'pre-wrap';
+        p.style.wordBreak = 'break-word';
         wrap.appendChild(p);
         return wrap;
       }
@@ -578,10 +618,12 @@
 
       modelEl?.addEventListener('change', () => {
         syncModel(modelEl.value, 'desktop');
+        saveModel(modelEl.value);
       });
 
       modelMobileEl?.addEventListener('change', () => {
         syncModel(modelMobileEl.value, 'mobile');
+        saveModel(modelMobileEl.value);
       });
 
       document.querySelectorAll('[data-lang-option]').forEach((btn) => {
@@ -608,6 +650,7 @@
       // hydrate from storage on load
       loadLanguage();
       loadState();
+      loadModel();
       syncModel(modelEl?.value || modelMobileEl?.value || 'gemini-2.5-flash');
       if (!activeConvoId) {
         const conv = createConversation(t('new_conversation'));
