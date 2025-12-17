@@ -63,6 +63,8 @@
       .dark .shadow-lg, .dark .shadow-md, .dark .shadow-sm { box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
       .dark .text-base { color: inherit; }
       .dark select { background-color: #11141c; color: #eaeaf0; border-color: #1f2430; }
+      .dark #lang-menu { background-color: #11141c; border-color: #1f2430; }
+
     </style>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -76,8 +78,8 @@
       <aside class="hidden lg:flex flex-col justify-between bg-white border-r border-stone-200 w-[15%] min-w-[220px] max-w-xs h-full">
         <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-stone-100">
           <div>
-            <p class="text-sm font-semibold text-[#1c1c0d]">Konuşmalar</p>
-            <p class="text-xs text-stone-500">Cihazında saklanır</p>
+            <p class="text-sm font-semibold text-[#1c1c0d]" data-i18n="conversations">Konuşmalar</p>
+            <p class="text-xs text-stone-500" data-i18n="stored">Cihazında saklanır</p>
           </div>
           <div class="flex items-center gap-2">
             <button id="delete-convo" class="size-10 flex items-center justify-center rounded-full border border-stone-200 text-stone-500 hover:bg-stone-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Seçili konuşmaları sil" disabled>
@@ -89,8 +91,9 @@
           </div>
         </div>
         <div id="convo-list" class="flex-1 overflow-y-auto no-scrollbar divide-y divide-stone-100"></div>
-        <div class="px-4 py-3 text-sm footer-madeby border-t border-stone-100">
+        <div class="px-4 py-3 text-sm footer-madeby border-t border-stone-100 flex items-center justify-between gap-3">
           <span>made by <a href="https://mrtoz.com" target="_blank" rel="noreferrer" class="font-semibold">MRTOZ</a></span>
+          <a href="http://127.0.0.1:5000/information" target="_blank" rel="noreferrer" class="text-xs text-stone-500 hover:text-stone-700 underline">Information</a>
         </div>
       </aside>
 
@@ -103,16 +106,22 @@
             </div>
             <div>
               <h2 class="text-lg font-bold leading-tight bot-title">mrtoz.ai</h2>
-              <p class="text-xs text-stone-500 font-medium">Online</p>
+              <p class="text-xs text-stone-500 font-medium" data-i18n="online">Online</p>
             </div>
           </div>
           <div class="flex items-center gap-2">
             <button id="theme-toggle" class="flex items-center justify-center rounded-full size-10 hover:bg-stone-100 text-[#1c1c0d] transition-colors" title="Tema">
               <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
             </button>
-            <button class="flex items-center justify-center rounded-full size-10 hover:bg-stone-100 text-[#1c1c0d] transition-colors">
-              <span class="material-symbols-outlined">more_vert</span>
-            </button>
+            <div class="relative">
+              <button id="lang-toggle" class="flex items-center justify-center rounded-full size-10 hover:bg-stone-100 text-[#1c1c0d] transition-colors" title="Dil">
+                <span class="text-sm font-semibold" data-i18n="language">Dil</span>
+              </button>
+              <div id="lang-menu" class="absolute right-0 mt-2 w-28 bg-white border border-stone-200 rounded-xl shadow-lg p-2 hidden">
+                <button data-lang-option="tr" aria-label="Türkçe" class="w-full mb-2 last:mb-0 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-stone-200 hover:bg-stone-100 transition-colors text-sm font-semibold">TR</button>
+                <button data-lang-option="en" aria-label="English" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-stone-200 hover:bg-stone-100 transition-colors text-sm font-semibold">EN</button>
+              </div>
+            </div>
           </div>
         </header>
 
@@ -125,7 +134,7 @@
               <button type="button" class="ml-2 size-10 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-600 transition-colors">
                 <span class="material-symbols-outlined text-[24px]">add_circle</span>
               </button>
-              <input id="prompt" class="flex-1 bg-transparent border-none text-[#1c1c0d] placeholder-stone-400 focus:ring-0 py-4 px-2 text-base" placeholder="Bir mesaj yazın..." type="text" />
+              <input id="prompt" class="flex-1 bg-transparent border-none text-[#1c1c0d] placeholder-stone-400 focus:ring-0 py-4 px-2 text-base" placeholder="Bir mesaj yazın..." type="text" data-i18n="input_placeholder" />
               <button id="send" type="submit" class="mr-2 size-10 flex items-center justify-center rounded-full bg-primary text-black shadow-md hover:bg-[#ebe705] hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
                 <span class="material-symbols-outlined text-[20px] font-bold ml-0.5">arrow_upward</span>
               </button>
@@ -134,7 +143,7 @@
         </div>
 
         <div class="model-picker fixed right-4 bottom-4 bg-white border border-stone-200 shadow-lg rounded-lg px-3 py-2 text-sm flex items-center gap-2">
-          <span class="text-stone-600">Model</span>
+          <span class="text-stone-600" data-i18n="model">Model</span>
           <select id="model" class="border border-stone-200 rounded-md px-2 py-1 text-sm focus:ring-primary focus:border-primary">
             <option value="gemini-2.5-flash" selected>gemini-2.5-flash</option>
             <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite</option>
@@ -156,12 +165,80 @@
       const deleteConvoBtn = document.getElementById('delete-convo');
       const themeToggleBtn = document.getElementById('theme-toggle');
       const themeIcon = document.getElementById('theme-icon');
+      const langToggleBtn = document.getElementById('lang-toggle');
+      const langMenu = document.getElementById('lang-menu');
 
       const STORAGE_KEY = 'cline_conversations_v1';
       const THEME_KEY = 'mrtoz_theme';
+      const LANG_KEY = 'mrtoz_lang';
+      const I18N = {
+        tr: {
+          conversations: 'Konuşmalar',
+          stored: 'Cihazında saklanır',
+          delete_selected: 'Seçili konuşmaları sil',
+          new_conversation: 'Yeni konuşma',
+          conversation_fallback: 'Konuşma',
+          online: 'Online',
+          theme: 'Tema',
+          language: 'Dil',
+          model: 'Model',
+          input_placeholder: 'Bir mesaj yazın...',
+          you: 'Sen',
+          quota_limit: 'Kota sınırına ulaşıldı veya istek sınırı aşıldı.',
+          error_prefix: 'Hata: ',
+          network_error: 'Ağ hatası: '
+        },
+        en: {
+          conversations: 'Conversations',
+          stored: 'Stored on your device',
+          delete_selected: 'Delete selected conversations',
+          new_conversation: 'New conversation',
+          conversation_fallback: 'Conversation',
+          online: 'Online',
+          theme: 'Theme',
+          language: 'Language',
+          model: 'Model',
+          input_placeholder: 'Type a message...',
+          you: 'You',
+          quota_limit: 'Quota or rate limit reached.',
+          error_prefix: 'Error: ',
+          network_error: 'Network error: '
+        }
+      };
+      let currentLang = 'tr';
       let conversations = [];
       let activeConvoId = null;
       let selectedConvoIds = new Set();
+
+      function t(key) {
+        const dict = I18N[currentLang] || {};
+        return dict[key] || key;
+      }
+
+      function loadLanguage() {
+        try {
+          const stored = localStorage.getItem(LANG_KEY);
+          if (stored && I18N[stored]) {
+            currentLang = stored;
+          }
+        } catch (_) {}
+      }
+
+      function applyTranslations() {
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+          const key = el.dataset.i18n;
+          const text = t(key);
+          if (el.tagName === 'INPUT' && key === 'input_placeholder') {
+            el.placeholder = text;
+          } else {
+            el.textContent = text;
+          }
+        });
+        deleteConvoBtn?.setAttribute('title', t('delete_selected'));
+        newConvoBtn?.setAttribute('title', t('new_conversation'));
+        themeToggleBtn?.setAttribute('title', t('theme'));
+        langToggleBtn?.setAttribute('title', t('language'));
+      }
 
       function loadState() {
         try {
@@ -208,7 +285,7 @@
         return 'conv-' + Date.now() + '-' + Math.floor(Math.random() * 1e6);
       }
 
-      function createConversation(title = 'Yeni konuşma') {
+      function createConversation(title = t('new_conversation')) {
         return { id: makeId(), title, messages: [], updatedAt: Date.now() };
       }
 
@@ -237,8 +314,8 @@
           activeConvoId = conv.id;
         }
         conv.messages.push({ role, text });
-        if (role === 'user' && conv.title === 'Yeni konuşma') {
-          conv.title = text.slice(0, 40) || 'Yeni konuşma';
+        if (role === 'user' && conv.title === t('new_conversation')) {
+          conv.title = text.slice(0, 40) || t('new_conversation');
         }
         touchConversation(conv);
         saveState();
@@ -269,11 +346,12 @@
           btn.className = 'flex-1 text-left';
           const title = document.createElement('div');
           title.className = 'text-sm font-medium text-[#1c1c0d] truncate';
-          title.textContent = conv.title || 'Konuşma';
+          title.textContent = conv.title || t('conversation_fallback');
           const meta = document.createElement('div');
           meta.className = 'text-xs text-stone-500';
           const date = new Date(conv.updatedAt || Date.now());
-          meta.textContent = date.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' }) + ' • ' + date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+          const locale = currentLang === 'en' ? 'en-US' : 'tr-TR';
+          meta.textContent = date.toLocaleDateString(locale, { month: 'short', day: 'numeric' }) + ' • ' + date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
           btn.appendChild(title);
           btn.appendChild(meta);
           btn.addEventListener('click', () => setActiveConversation(conv.id));
@@ -293,7 +371,7 @@
       }
 
       function newConversation() {
-        const conv = createConversation();
+        const conv = createConversation(t('new_conversation'));
         conversations.unshift(conv);
         activeConvoId = conv.id;
         selectedConvoIds.clear();
@@ -373,7 +451,7 @@
         const name = document.createElement('span');
         name.className = 'text-xs text-stone-500 ml-2';
         if (role !== 'user') name.classList.add('bot-name-label');
-        name.textContent = role === 'user' ? 'You' : 'mrtoz.ai';
+        name.textContent = role === 'user' ? t('you') : 'mrtoz.ai';
 
         const bubbleEl = document.createElement('div');
         bubbleEl.className = `text-base leading-relaxed shadow-sm px-5 py-3 rounded-2xl ${role === 'user' ? 'bg-primary text-[#1c1c0d] rounded-br-sm font-medium' : 'bg-white text-[#1c1c0d] rounded-bl-sm'} `;
@@ -423,13 +501,17 @@
             addMessageToActive('bot', j.reply);
             bubble(j.reply, 'bot');
           } else {
-            const errText = 'Error: ' + (j.error || 'unknown');
+            const bodyText = typeof j.body === 'string' ? j.body : (j.body ? JSON.stringify(j.body) : '');
+            const detail = j.body_text || bodyText;
+            const errText = j.quota_exceeded
+              ? t('quota_limit')
+              : t('error_prefix') + (j.error || 'unknown') + (detail ? ' - ' + detail : '');
             addMessageToActive('bot', errText);
             bubble(errText, 'bot');
           }
         } catch (e) {
           loadingBubble.remove();
-          const errText = 'Network error: ' + e.message;
+          const errText = t('network_error') + e.message;
           addMessageToActive('bot', errText);
           bubble(errText, 'bot');
         }
@@ -461,10 +543,37 @@
         applyTheme(next);
       });
 
+      langToggleBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        langMenu?.classList.toggle('hidden');
+      });
+
+      document.querySelectorAll('[data-lang-option]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const lang = btn.getAttribute('data-lang-option');
+          if (lang && I18N[lang]) {
+            currentLang = lang;
+            try { localStorage.setItem(LANG_KEY, lang); } catch (_) {}
+            applyTranslations();
+            renderConvoList();
+            renderMessages();
+          }
+          langMenu?.classList.add('hidden');
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!langMenu || !langToggleBtn) return;
+        if (!langMenu.contains(e.target) && !langToggleBtn.contains(e.target)) {
+          langMenu.classList.add('hidden');
+        }
+      });
+
       // hydrate from storage on load
+      loadLanguage();
       loadState();
       if (!activeConvoId) {
-        const conv = createConversation();
+        const conv = createConversation(t('new_conversation'));
         conversations = [conv];
         activeConvoId = conv.id;
         saveState();
@@ -472,6 +581,7 @@
       renderConvoList();
       renderMessages();
       initTheme();
+      applyTranslations();
     </script>
   </body>
 </html>

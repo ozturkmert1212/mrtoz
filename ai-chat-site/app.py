@@ -19,6 +19,10 @@ SUPPORTED_MODELS = {
 def index():
     return render_template('index.html')
 
+@app.route('/information')
+def information():
+    return render_template('information.html')
+
 @app.route('/api/chat', methods=['POST'])
 def chat():
     data = request.get_json() or {}
@@ -84,16 +88,30 @@ def chat():
             body = resp.json()
         except Exception:
             body = resp.text
-        app.logger.error('Upstream Grok error %s: %s', resp.status_code, body)
-        return jsonify({'error': 'Upstream Grok error', 'status': resp.status_code, 'body': body}), resp.status_code
 
-    # Select endpoints based on requested model; fallbacks included (Gemini)
+        def _body_text(val):
+            if isinstance(val, dict):
+                if 'error' in val:
+                    err = val.get('error')
+                    if isinstance(err, dict):
+                        return str(err.get('message') or err.get('detail') or err)
+                    return str(err)
+                return str(val)
+            return str(val)
+
+        body_text_raw = _body_text(body)
+        body_text = body_text_raw.lower()
+        quota_hit = resp.status_code in (402, 403, 429) or ('rate limit' in body_text) or ('quota' in body_text) or ('billing' in body_text)
+        if quota_hit:
+            return jsonify({'error': 'Grok quota or rate limit exceeded', 'status': resp.status_code, 'body': body, 'quota_exceeded': True}), resp.status_code
+        app.logger.error('Upstream Grok error %s: %s', resp.status_code, body)
+        return jsonify({'error': 'Upstream Grok error', 'status': resp.status_code, 'body': body, 'body_text': body_text_raw}), resp.status_code
+
+    # Select endpoints: when a model is chosen, do not fallback to others to avoid surprise switching
     if model:
         if model not in SUPPORTED_MODELS or model.startswith('grok'):
             return jsonify({'error': 'unsupported model', 'allowed': [m for m in SUPPORTED_MODELS.keys()]}), 400
-        primary = SUPPORTED_MODELS[model]
-        fallbacks = [url for name, url in SUPPORTED_MODELS.items() if url != primary and not name.startswith('grok')]
-        endpoints = [primary] + fallbacks
+        endpoints = [SUPPORTED_MODELS[model]]
     else:
         endpoints = [
             SUPPORTED_MODELS['gemini-2.5-flash'],
@@ -138,6 +156,26 @@ def chat():
             body = last_resp.json()
         except Exception:
             body = last_resp.text
+
+        def _body_text(val):
+            if isinstance(val, dict):
+                if 'error' in val:
+                    err = val.get('error')
+                    if isinstance(err, dict):
+                        return str(err.get('message') or err.get('detail') or err)
+                    return str(err)
+                return str(val)
+            return str(val)
+
+        body_text = _body_text(body).lower()
+        quota_hit = last_resp.status_code in (402, 403, 429) or ('rate limit' in body_text) or ('quota' in body_text) or ('billing' in body_text)
+        if quota_hit:
+            return jsonify({
+                'error': 'Gemini quota or rate limit exceeded',
+                'status': last_resp.status_code,
+                'body': body,
+                'quota_exceeded': True
+            }), last_resp.status_code
         app.logger.error('Upstream Gemini error %s: %s', last_resp.status_code, body)
         return jsonify({'error': 'Upstream Gemini error', 'status': last_resp.status_code, 'body': body}), last_resp.status_code
 
