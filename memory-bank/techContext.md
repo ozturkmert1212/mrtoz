@@ -70,6 +70,7 @@ python ai-chat-site\run_waitress.py
 - Themes: light/dark toggle with persistence; user bubble text forced black even in dark mode; footer has `made by MRTOZ` and `Information` link.
 - Language toggle TR/EN with i18n for labels, placeholders, error/quota messages; timestamps localized.
 - Mobile: fixed picker hidden on <768px, inline picker in header; pickers stay in sync; extra bottom padding to avoid overlap with input.
+- Model selection persisted in `localStorage` and synchronized between desktop/mobile pickers.
 - Testing, linting, CI/CD conventions and commands.
 - Development workflow: local virtualenv → set `GEMINI_API_KEY` (and optionally `GROK_API_KEY`) → run `python ai-chat-site\app.py`.
 ## Dependencies

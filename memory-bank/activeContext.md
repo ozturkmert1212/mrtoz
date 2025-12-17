@@ -23,6 +23,7 @@ UI/UX (2025-12-17):
  - Dark/light themes with toggle; bot name blue (light) / yellow (dark); user bubble text forced black even in dark mode. Sidebar footer holds “made by MRTOZ” and `Information` link.
  - Language toggle (TR/EN) with i18n for labels/placeholders/errors; locale-based timestamps; model label translated.
  - Mobile UX: header inline model picker for phones, desktop picker hidden on mobile, selectors stay in sync; extra spacing to prevent overlap with input.
+ - Model choice persists in localStorage (desktop/mobile pickers synchronized on load/change).
  - Error handling: quota/rate-limit responses from Gemini/Grok surface a clear one-line message; errors include body text when available.
  - `/information` page with bilingual notice; link uses `/information` path for deployable hosts.
 

@@ -14,6 +14,7 @@
 - `/information` page exists with bilingual notice; link uses relative path for deployment.
 - `.gitignore` added to keep `.env`, `node_modules/`, and `__pycache__/` out of repo.
 - Mobile UX tweaks: centered/raised model picker on small screens, and inline mobile model picker in header synced with desktop picker; extra padding to avoid overlap with input.
+- Model selection now persists in localStorage and is restored on reload (desktop + mobile pickers stay in sync).
 
 ## What's Left
 - Expand `systemPatterns.md` with actual architecture diagrams and integration notes.
