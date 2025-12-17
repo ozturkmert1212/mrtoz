@@ -65,6 +65,22 @@
       .dark select { background-color: #11141c; color: #eaeaf0; border-color: #1f2430; }
       .dark #lang-menu { background-color: #11141c; border-color: #1f2430; }
 
+      /* Mobile sidebar toggle */
+      #sidebar { transform: translateX(-100%); transition: transform 0.25s ease; }
+      #sidebar.open { transform: translateX(0); }
+      #sidebar-backdrop { display: none; }
+      #sidebar-backdrop.active { display: block; }
+
+      /* Show hamburger on all viewports */
+      .hamburger-btn { display: flex; }
+
+      /* Desktop sidebar defaults to open but can collapse */
+      @media (min-width: 1024px) {
+        #sidebar { position: static; transform: translateX(0); }
+        #sidebar.desktop-collapsed { display: none; }
+        #sidebar-backdrop { display: none !important; }
+      }
+
       /* Prevent list bullets in AI responses */
       .bubble-bot ul, .bubble-bot ol, .bubble-bot li { list-style: none; margin: 0; padding-left: 0; }
       .bubble-bot li::marker { content: ''; }
@@ -92,7 +108,8 @@
   </head>
   <body class="h-screen w-full overflow-hidden bg-background-light text-[#1c1c0d] font-display">
     <div class="flex h-full w-full">
-      <aside class="hidden lg:flex flex-col justify-between bg-white border-r border-stone-200 w-[15%] min-w-[220px] max-w-xs h-full">
+      <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 z-30 lg:hidden"></div>
+      <aside id="sidebar" class="flex flex-col justify-between bg-white border-r border-stone-200 w-72 max-w-[80vw] h-full fixed lg:static z-40 lg:z-0 lg:w-[15%] lg:min-w-[220px] lg:max-w-xs lg:translate-x-0 hidden lg:flex">
         <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-stone-100">
           <div>
             <p class="text-sm font-semibold text-[#1c1c0d]" data-i18n="conversations">Konuşmalar</p>
@@ -117,6 +134,9 @@
       <main class="flex-1 h-full flex flex-col relative bg-background-light">
         <header class="flex items-center justify-between px-6 py-4 bg-background-light/90 backdrop-blur-sm z-10 sticky top-0">
           <div class="flex items-center gap-3">
+            <button id="sidebar-toggle" class="hamburger-btn flex items-center justify-center rounded-full size-10 hover:bg-stone-100 text-[#1c1c0d] transition-colors" aria-label="Sidebar">
+              <span class="material-symbols-outlined">menu</span>
+            </button>
             <div class="relative">
               <div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shadow-sm" style="background-image: url('/static/img/mrtozai.PNG');"></div>
               <div class="absolute bottom-0 right-0 size-2.5 bg-green-500 rounded-full border-2 border-background-light"></div>
@@ -194,6 +214,9 @@
       const themeIcon = document.getElementById('theme-icon');
       const langToggleBtn = document.getElementById('lang-toggle');
       const langMenu = document.getElementById('lang-menu');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarToggle = document.getElementById('sidebar-toggle');
+      const sidebarBackdrop = document.getElementById('sidebar-backdrop');
 
       const STORAGE_KEY = 'cline_conversations_v1';
       const THEME_KEY = 'mrtoz_theme';
@@ -644,6 +667,42 @@
         if (!langMenu || !langToggleBtn) return;
         if (!langMenu.contains(e.target) && !langToggleBtn.contains(e.target)) {
           langMenu.classList.add('hidden');
+        }
+      });
+
+      function closeSidebar() {
+        sidebar?.classList.remove('open');
+        sidebar?.classList.add('hidden');
+        sidebarBackdrop?.classList.remove('active');
+      }
+
+      sidebarToggle?.addEventListener('click', () => {
+        if (!sidebar) return;
+        const isDesktop = window.innerWidth >= 1024;
+
+        if (isDesktop) {
+          sidebar.classList.toggle('desktop-collapsed');
+          return;
+        }
+
+        const willOpen = !sidebar.classList.contains('open');
+        if (willOpen) {
+          sidebar.classList.remove('hidden');
+          sidebar.classList.add('open');
+          sidebarBackdrop?.classList.add('active');
+        } else {
+          closeSidebar();
+        }
+      });
+
+      sidebarBackdrop?.addEventListener('click', () => closeSidebar());
+
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1024) {
+          sidebar?.classList.remove('hidden', 'open');
+          sidebarBackdrop?.classList.remove('active');
+        } else {
+          sidebar?.classList.remove('desktop-collapsed');
         }
       });
 
