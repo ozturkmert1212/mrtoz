@@ -65,21 +65,10 @@
       .dark select { background-color: #11141c; color: #eaeaf0; border-color: #1f2430; }
       .dark #lang-menu { background-color: #11141c; border-color: #1f2430; }
 
-      /* Mobile sidebar toggle */
-      #sidebar { transform: translateX(-100%); transition: transform 0.25s ease; }
-      #sidebar.open { transform: translateX(0); }
-      #sidebar-backdrop { display: none; }
-      #sidebar-backdrop.active { display: block; }
-
-      /* Show hamburger on all viewports */
+      /* Bootstrap offcanvas sidebar width */
+      #sidebar { --bs-offcanvas-width: 18rem; }
       .hamburger-btn { display: flex; }
-
-      /* Desktop sidebar defaults to open but can collapse */
-      @media (min-width: 1024px) {
-        #sidebar { position: static; transform: translateX(0); }
-        #sidebar.desktop-collapsed { display: none; }
-        #sidebar-backdrop { display: none !important; }
-      }
+      #sidebar .offcanvas-body { display: flex; flex-direction: column; height: 100%; padding: 0; }
 
       /* Prevent list bullets in AI responses */
       .bubble-bot ul, .bubble-bot ol, .bubble-bot li { list-style: none; margin: 0; padding-left: 0; }
@@ -89,8 +78,9 @@
 
       /* Mobile tweaks */
       @media (max-width: 768px) {
-        header { padding: 12px 14px !important; }
-        #messages { padding: 12px !important; }
+        header { padding: 12px 14px !important; position: sticky !important; top: 0 !important; z-index: 30; background: #f8f8f8; }
+        .dark header { background: #0d0f12; }
+        #messages { padding: 12px !important; padding-top: 8px; }
         #chat-form { border-radius: 18px; }
         /* Hide fixed picker; show inline picker near name */
         .model-picker { display: none; }
@@ -108,33 +98,61 @@
   </head>
   <body class="h-screen w-full overflow-hidden bg-background-light text-[#1c1c0d] font-display">
     <div class="flex h-full w-full">
-      <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 z-30 lg:hidden"></div>
-      <aside id="sidebar" class="flex flex-col justify-between bg-white border-r border-stone-200 w-72 max-w-[80vw] h-full fixed lg:static z-40 lg:z-0 lg:w-[15%] lg:min-w-[220px] lg:max-w-xs lg:translate-x-0 hidden lg:flex">
-        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-stone-100">
-          <div>
-            <p class="text-sm font-semibold text-[#1c1c0d]" data-i18n="conversations">Konuşmalar</p>
-            <p class="text-xs text-stone-500" data-i18n="stored">Cihazında saklanır</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button id="delete-convo" class="size-10 flex items-center justify-center rounded-full border border-stone-200 text-stone-500 hover:bg-stone-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Seçili konuşmaları sil" disabled>
-              <span class="material-symbols-outlined text-[18px]">delete</span>
-            </button>
-            <button id="new-convo" class="size-10 flex items-center justify-center rounded-full border border-stone-200 hover:bg-stone-100 transition-colors" title="Yeni konuşma">
-              <span class="material-symbols-outlined text-[20px]">add</span>
-            </button>
-          </div>
+      <aside
+        id="sidebar"
+        class="offcanvas offcanvas-start offcanvas-lg bg-white border-r border-stone-200 w-72 max-w-[80vw] h-full z-40 lg:z-0"
+        tabindex="-1"
+        aria-labelledby="sidebarLabel"
+        style="--bs-offcanvas-width: 18rem;"
+      >
+        <div class="offcanvas-header lg:hidden border-b border-stone-100 px-4 py-3">
+          <h5 class="mb-0 text-sm font-semibold text-[#1c1c0d]" id="sidebarLabel" data-i18n="conversations">Konuşmalar</h5>
+          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div id="convo-list" class="flex-1 overflow-y-auto no-scrollbar divide-y divide-stone-100"></div>
-        <div class="px-4 py-3 text-sm footer-madeby border-t border-stone-100 flex items-center justify-between gap-3">
-          <span>made by <a href="https://mrtoz.com" target="_blank" rel="noreferrer" class="font-semibold" style="text-decoration: underline;">MRTOZ</a></span>
-          <a href="/information" target="_blank" rel="noreferrer" class="text-xs text-stone-500 hover:text-stone-700 underline">Information</a>
+        <div class="offcanvas-body p-0 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-stone-100">
+            <div>
+              <p class="text-sm font-semibold text-[#1c1c0d]" data-i18n="conversations">Konuşmalar</p>
+              <p class="text-xs text-stone-500" data-i18n="stored">Cihazında saklanır</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="delete-convo" class="size-10 flex items-center justify-center rounded-full border border-stone-200 text-stone-500 hover:bg-stone-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" title="Seçili konuşmaları sil" disabled>
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+              <button id="new-convo" class="size-10 flex items-center justify-center rounded-full border border-stone-200 hover:bg-stone-100 transition-colors" title="Yeni konuşma">
+                <span class="material-symbols-outlined text-[20px]">add</span>
+              </button>
+            </div>
+          </div>
+          <div id="convo-list" class="flex-1 overflow-y-auto no-scrollbar divide-y divide-stone-100"></div>
+          <div class="mobile-model-picker items-center gap-2 px-4 py-3 border-t border-stone-100">
+            <span class="text-xs text-stone-500" data-i18n="model">Model</span>
+            <select id="model-mobile" class="border border-stone-200 rounded-md px-2 py-1 text-xs focus:ring-primary focus:border-primary">
+              <option value="gemini-2.5-flash" selected>gemini-2.5-flash</option>
+              <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite</option>
+              <option value="gemma-3-12b">gemma-3-12b</option>
+              <option value="grok-3">grok-3</option>
+            </select>
+          </div>
+          <div class="px-4 py-3 text-sm footer-madeby border-t border-stone-100 flex items-center justify-between gap-3 mt-auto">
+            <span>made by <a href="https://mrtoz.com" target="_blank" rel="noreferrer" class="font-semibold" style="text-decoration: underline;">MRTOZ</a></span>
+            <a href="/information" target="_blank" rel="noreferrer" class="text-xs text-stone-500 hover:text-stone-700 underline">Information</a>
+          </div>
         </div>
       </aside>
 
       <main class="flex-1 h-full flex flex-col relative bg-background-light">
         <header class="flex items-center justify-between px-6 py-4 bg-background-light/90 backdrop-blur-sm z-10 sticky top-0">
           <div class="flex items-center gap-3">
-            <button id="sidebar-toggle" class="hamburger-btn flex items-center justify-center rounded-full size-10 hover:bg-stone-100 text-[#1c1c0d] transition-colors" aria-label="Sidebar">
+            <button
+              id="sidebar-toggle"
+              class="hamburger-btn flex items-center justify-center rounded-full size-10 hover:bg-stone-100 text-[#1c1c0d] transition-colors"
+              aria-label="Sidebar"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#sidebar"
+              aria-controls="sidebar"
+            >
               <span class="material-symbols-outlined">menu</span>
             </button>
             <div class="relative">
@@ -144,15 +162,6 @@
             <div>
               <h2 class="text-lg font-bold leading-tight bot-title">mrtoz.ai</h2>
               <p class="text-xs text-stone-500 font-medium" data-i18n="online">Online</p>
-            </div>
-            <div class="mobile-model-picker items-center gap-2 ml-2">
-              <span class="text-xs text-stone-500" data-i18n="model">Model</span>
-              <select id="model-mobile" class="border border-stone-200 rounded-md px-2 py-1 text-xs focus:ring-primary focus:border-primary">
-                <option value="gemini-2.5-flash" selected>gemini-2.5-flash</option>
-                <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite</option>
-                <option value="gemma-3-12b">gemma-3-12b</option>
-                <option value="grok-3">grok-3</option>
-              </select>
             </div>
           </div>
           <div class="flex items-center gap-2">
@@ -214,9 +223,6 @@
       const themeIcon = document.getElementById('theme-icon');
       const langToggleBtn = document.getElementById('lang-toggle');
       const langMenu = document.getElementById('lang-menu');
-      const sidebar = document.getElementById('sidebar');
-      const sidebarToggle = document.getElementById('sidebar-toggle');
-      const sidebarBackdrop = document.getElementById('sidebar-backdrop');
 
       const STORAGE_KEY = 'cline_conversations_v1';
       const THEME_KEY = 'mrtoz_theme';
@@ -670,41 +676,7 @@
         }
       });
 
-      function closeSidebar() {
-        sidebar?.classList.remove('open');
-        sidebar?.classList.add('hidden');
-        sidebarBackdrop?.classList.remove('active');
-      }
-
-      sidebarToggle?.addEventListener('click', () => {
-        if (!sidebar) return;
-        const isDesktop = window.innerWidth >= 1024;
-
-        if (isDesktop) {
-          sidebar.classList.toggle('desktop-collapsed');
-          return;
-        }
-
-        const willOpen = !sidebar.classList.contains('open');
-        if (willOpen) {
-          sidebar.classList.remove('hidden');
-          sidebar.classList.add('open');
-          sidebarBackdrop?.classList.add('active');
-        } else {
-          closeSidebar();
-        }
-      });
-
-      sidebarBackdrop?.addEventListener('click', () => closeSidebar());
-
-      window.addEventListener('resize', () => {
-        if (window.innerWidth >= 1024) {
-          sidebar?.classList.remove('hidden', 'open');
-          sidebarBackdrop?.classList.remove('active');
-        } else {
-          sidebar?.classList.remove('desktop-collapsed');
-        }
-      });
+      // Sidebar offcanvas now uses Bootstrap's own toggling (data-bs-toggle)
 
       // hydrate from storage on load
       loadLanguage();
