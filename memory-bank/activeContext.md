@@ -22,6 +22,7 @@ UI/UX (2025-12-17):
  - Branding: `mrtoz.ai`; favicon/bot avatar `/static/img/mrtozai.PNG`.
  - Dark/light themes with toggle; bot name blue (light) / yellow (dark); user bubble text forced black even in dark mode. Sidebar footer holds “made by MRTOZ” and `Information` link.
  - Language toggle (TR/EN) with i18n for labels/placeholders/errors; locale-based timestamps; model label translated.
+ - Mobile UX: header inline model picker for phones, desktop picker hidden on mobile, selectors stay in sync; extra spacing to prevent overlap with input.
  - Error handling: quota/rate-limit responses from Gemini/Grok surface a clear one-line message; errors include body text when available.
  - `/information` page with bilingual notice; link uses `/information` path for deployable hosts.
 
@@ -32,6 +33,7 @@ UI/UX (2025-12-17):
  - Ensured user bubble text stays black in dark mode.
  - Added `/information` route/page and sidebar footer link; link is relative for deployment.
  - Added `.gitignore` to exclude `.env`, `node_modules/`, `__pycache__/`.
+- Mobile responsive fixes: raised/centered picker on small screens, inline picker beside name on mobile, synced pickers.
 ## Next Steps
 - Verify Gemini access with the currently available models (2.5-flash, 2.5-pro) and adjust if ListModels changes.
  - Verify Gemini access with current models (2.5-flash, 2.5-flash-lite, gemma-3-12b) and adjust if needed.

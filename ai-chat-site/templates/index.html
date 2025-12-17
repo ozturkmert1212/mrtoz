@@ -65,15 +65,17 @@
       .dark select { background-color: #11141c; color: #eaeaf0; border-color: #1f2430; }
       .dark #lang-menu { background-color: #11141c; border-color: #1f2430; }
 
+      .mobile-model-picker { display: none; }
+
       /* Mobile tweaks */
       @media (max-width: 768px) {
         header { padding: 12px 14px !important; }
         #messages { padding: 12px !important; }
         #chat-form { border-radius: 18px; }
-        /* Move model picker above the input to avoid overlap */
-        .model-picker { left: 50%; right: auto; transform: translateX(-50%); bottom: 96px; }
-        .model-picker select { max-width: 140px; }
-        main { padding-bottom: 140px; }
+        /* Hide fixed picker; show inline picker near name */
+        .model-picker { display: none; }
+        .mobile-model-picker { display: flex; }
+        main { padding-bottom: 80px; }
       }
 
     </style>
@@ -118,6 +120,15 @@
             <div>
               <h2 class="text-lg font-bold leading-tight bot-title">mrtoz.ai</h2>
               <p class="text-xs text-stone-500 font-medium" data-i18n="online">Online</p>
+            </div>
+            <div class="mobile-model-picker items-center gap-2 ml-2">
+              <span class="text-xs text-stone-500" data-i18n="model">Model</span>
+              <select id="model-mobile" class="border border-stone-200 rounded-md px-2 py-1 text-xs focus:ring-primary focus:border-primary">
+                <option value="gemini-2.5-flash" selected>gemini-2.5-flash</option>
+                <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite</option>
+                <option value="gemma-3-12b">gemma-3-12b</option>
+                <option value="grok-3">grok-3</option>
+              </select>
             </div>
           </div>
           <div class="flex items-center gap-2">
@@ -170,6 +181,7 @@
       const promptEl = document.getElementById('prompt');
       const sendBtn = document.getElementById('send');
       const modelEl = document.getElementById('model');
+      const modelMobileEl = document.getElementById('model-mobile');
       const formEl = document.getElementById('chat-form');
       const convoListEl = document.getElementById('convo-list');
       const newConvoBtn = document.getElementById('new-convo');
@@ -216,10 +228,15 @@
           network_error: 'Network error: '
         }
       };
-      let currentLang = 'tr';
       let conversations = [];
       let activeConvoId = null;
       let selectedConvoIds = new Set();
+      let currentLang = 'tr';
+
+      function syncModel(value, source) {
+        if (modelEl && source !== 'desktop') modelEl.value = value;
+        if (modelMobileEl && source !== 'mobile') modelMobileEl.value = value;
+      }
 
       function t(key) {
         const dict = I18N[currentLang] || {};
@@ -500,7 +517,7 @@
         const loadingBubble = bubble('...', 'bot', true);
 
         try {
-          const model = modelEl?.value;
+          const model = modelEl?.value || modelMobileEl?.value;
           const res = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -559,6 +576,14 @@
         langMenu?.classList.toggle('hidden');
       });
 
+      modelEl?.addEventListener('change', () => {
+        syncModel(modelEl.value, 'desktop');
+      });
+
+      modelMobileEl?.addEventListener('change', () => {
+        syncModel(modelMobileEl.value, 'mobile');
+      });
+
       document.querySelectorAll('[data-lang-option]').forEach((btn) => {
         btn.addEventListener('click', () => {
           const lang = btn.getAttribute('data-lang-option');
@@ -583,6 +608,7 @@
       // hydrate from storage on load
       loadLanguage();
       loadState();
+      syncModel(modelEl?.value || modelMobileEl?.value || 'gemini-2.5-flash');
       if (!activeConvoId) {
         const conv = createConversation(t('new_conversation'));
         conversations = [conv];
