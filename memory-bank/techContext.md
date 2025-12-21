@@ -16,7 +16,7 @@ Quick start (Windows)
 ## Technologies
 - Python 3.10+ (tested with 3.11)
 - Flask (simple HTTP backend)
-- `requests` for outbound HTTP to Gemini/Grok
+- `requests` for outbound HTTP to Gemini/Grok/OpenAI
 - No DB for chat logs (logging disabled; SQLite unused)
 
 
@@ -76,12 +76,14 @@ python ai-chat-site\run_waitress.py
 ## Dependencies
 - Google Gemini (Generative Language API) — models: `gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemma-3-12b`.
 - Grok (xAI) — endpoint `https://api.x.ai/v1/chat/completions`, model `grok-3`.
+- OpenAI — endpoint `https://api.openai.com/v1/chat/completions`, model `gpt-4o`.
 - `requests` for HTTP calls from backend.
 
 - Primary: `gemini-2.5-flash`
 ## Tool Usage Patterns
-- Dev workflow: local venv → set `GEMINI_API_KEY` (and optional `GROK_API_KEY`) → run `python ai-chat-site\app.py` or `run_waitress.py`.
+- Dev workflow: local venv → set `GEMINI_API_KEY` (and optional `GROK_API_KEY`, `OPENAI_API_KEY`) → run `python ai-chat-site\app.py` or `run_waitress.py`.
 - Do not commit keys or `.env` files; `.env` is gitignored.
+- `.gitignore` protects API keys from being pushed to GitHub.
 
 Python (`requests`) example matching `ai-chat-site/app.py` structure:
 
